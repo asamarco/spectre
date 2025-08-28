@@ -1,12 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello World</title>
-  </head>
+<html>
+<head>
+    <title>Spectrum to Color Converter</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
 
-  <body>
-    <h1>Hello World</h1>
-  </body>
+        #color-display {
+            width: 200px;
+            height: 200px;
+            border: 1px solid black;
+            margin-top: 20px;
+        }
+
+        #input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        textarea {
+            width: 400px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spectrum to Color Converter</h1>
+    <p>Upload a file or paste your spectrum data below:</p>
+
+    <div id="input-container">
+        <input type="file" id="spectrum-file">
+        <p>or</p>
+        <textarea id="spectrum-text" placeholder="Paste your spectrum data here (e.g., 380 0.0014, 381 0.0015, ...)"></textarea>
+    </div>
+
+    <button id="convert-btn">Convert</button>
+    <div id="color-display"></div>
+
+    <script>
+        document.getElementById('convert-btn').addEventListener('click', () => {
+            const fileInput = document.getElementById('spectrum-file');
+            const textInput = document.getElementById('spectrum-text');
+            const file = fileInput.files[0];
+            const text = textInput.value;
+
+            let fetchPromise;
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('spectrum_file', file);
+                fetchPromise = fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+            } else if (text.trim() !== '') {
+                fetchPromise = fetch('/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ spectrum_text: text })
+                });
+            } else {
+                alert('Please upload a file or paste some data.');
+                return;
+            }
+
+            fetchPromise.then(response => response.json())
+            .then(data => {
+                if (data.rgb) {
+                    const [r, g, b] = data.rgb.map(Math.round);
+                    document.getElementById('color-display').style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    alert(data.error || 'An unknown error occurred.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while converting the data.');
+            });
+        });
+    </script>
+</body>
 </html>
