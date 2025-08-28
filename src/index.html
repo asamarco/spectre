@@ -32,6 +32,11 @@
             height: 200px;
             margin-bottom: 20px;
         }
+
+        #color-values {
+            margin-top: 20px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -46,6 +51,7 @@
 
     <button id="convert-btn">Convert</button>
     <div id="color-display"></div>
+    <div id="color-values"></div>
 
     <script>
         document.getElementById('convert-btn').addEventListener('click', () => {
@@ -79,8 +85,10 @@
             fetchPromise.then(response => response.json())
             .then(data => {
                 if (data.rgb) {
-                    const [r, g, b] = data.rgb.map(Math.round);
+                    const [r, g, b] = data.rgb;
                     document.getElementById('color-display').style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                    document.getElementById('color-values').innerHTML = 
+                        `RGB: (${r}, ${g}, ${b})<br>HEX: ${data.hex}`;
                 } else {
                     alert(data.error || 'An unknown error occurred.');
                 }

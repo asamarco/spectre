@@ -24,6 +24,11 @@ def parse_spectrum_data(content):
                 pass
     return np.array(wavelengths), np.array(spectrum_data)
 
+def rgb_to_hex(rgb):
+    """Converts an RGB tuple to a HEX string."""
+    r, g, b = [int(max(0, min(255, c))) for c in rgb]
+    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+
 @app.route("/")
 def index():
     return send_file('src/index.html')
@@ -56,8 +61,12 @@ def convert_spectrum():
     
     # Convert XYZ to sRGB
     rgb = xyz_to_rgb(xyz)
+    rgb_list = [round(c) for c in rgb]
+
+    # Convert RGB to HEX
+    hex_color = rgb_to_hex(rgb_list)
     
-    return jsonify({'rgb': rgb.tolist()})
+    return jsonify({'rgb': rgb_list, 'hex': hex_color})
 
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
